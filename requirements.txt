@@ -1,0 +1,6 @@
+aiohttp==3.8.1
+asyncio==3.4.3
+bs4==0.0.1
+pandas==1.4.1
+requests==2.27.1
+lxml==4.8.0
