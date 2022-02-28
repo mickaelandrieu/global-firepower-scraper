@@ -1,5 +1,4 @@
 import asyncio
-from turtle import position
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup as bs
 import requests
