@@ -1,3 +1,5 @@
 env/
-output/
-!ouput/.gitkeep
+build/
+dist/
+globalfirepower_scraper.egg-info/
+__pycache__/
