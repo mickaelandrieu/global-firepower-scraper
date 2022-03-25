@@ -9,7 +9,11 @@ import re
 
 class GlobalFirePowerScraper:
 
-    def get_country_ranking_table():
+    def __init__(self):
+        self.ranking = pd.DataFrame()
+        self.country_details = pd.DataFrame()
+
+    def __get_country_ranking_table(self) -> pd.DataFrame:
         """From the base url, retrieve the main information for every country"""
 
         base_url = "https://www.globalfirepower.com/countries-listing.php"
@@ -35,21 +39,29 @@ class GlobalFirePowerScraper:
                 'progress': progress,
                 'id': id
             })
+        
+        self.ranking = pd.DataFrame.from_dict(ranking_table)
 
-        return pd.DataFrame.from_dict(ranking_table)
+        return self.ranking
 
-    def get_countries_details(self, ranking):
+    def __get_countries_details(self) -> pd.DataFrame:
 
         details_url = "https://www.globalfirepower.com/country-military-strength-detail.php"
-        urls = ['{0}?country_id={1}'.format(details_url, id) for id in ranking['id']]
+        urls = ['{0}?country_id={1}'.format(details_url, id) for id in self.ranking['id']]
 
         loop = asyncio.get_event_loop()
-        future = asyncio.ensure_future(self._fetch_all(urls, ranking))
+        future = asyncio.ensure_future(self.__fetch_all(urls))
         loop.run_until_complete(future)
 
-        return ranking
+        return self.country_details
+    
+    def get_armies_information(self) -> pd.DataFrame:
+        self.ranking = self.__get_country_ranking_table()
+        self.country_details = self.__get_countries_details()
 
-    def _get_country_data(html_content, position):
+        return self.ranking.merge(self.country_details, on='rank')
+
+    def __get_country_data(self, html_content, position):
         country_data = []
         soup = bs(html_content, 'lxml')
 
@@ -86,17 +98,21 @@ class GlobalFirePowerScraper:
 
         return pd.DataFrame.from_dict(country_data)
 
-    async def _fetch_all(self, urls, ranking):
+    async def __fetch_all(self, urls):
         tasks = []
         async with ClientSession() as session:
             for position, url in enumerate(urls):
-                task = asyncio.ensure_future(self._fetch(url, position, ranking, session))
+                task = asyncio.ensure_future(self.__fetch(url, position, session))
                 tasks.append(task)
             _ = await asyncio.gather(*tasks)
 
 
-    async def _fetch(self, url, position, ranking, session):
+    async def __fetch(self, url, position, session):
         async with session.get(url) as response:
             r = await response.read()
 
-            ranking.merge(self, self._get_country_data(r, position), on='rank')
+            country_data = self.__get_country_data(r, position)
+            if self.country_details.empty:
+                self.country_details = country_data
+            else:
+                self.country_details = pd.concat([self.country_details, country_data], axis='rows')
