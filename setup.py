@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="globalfirepower-scraper",
-    version="0.0.2",
+    version="0.1",
     author="Mickaël Andrieu",
     author_email="mickael.andrieu@solvolabs.com",
     url="https://github.com/mickaelandrieu/global-firepower-scraper",
@@ -25,8 +25,9 @@ setuptools.setup(
         "aiohttp==3.8.1",
         "asyncio==3.4.3",
         "bs4==0.0.1",
-        "pandas==1.4.1",
-        "requests==2.27.1",
+        "pandas>=1.3.0",
+        "cloudscraper==1.2.60",
+        "aiocfscrape==1.0.0",
         "lxml==4.8.0"
     ]
 )

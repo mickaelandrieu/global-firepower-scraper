@@ -1,8 +1,8 @@
-import requests
+import cloudscraper
 import asyncio
 from aiohttp import ClientSession
+from aiocfscrape import CloudflareScraper
 from bs4 import BeautifulSoup as bs
-import requests
 import pandas as pd
 import urllib.parse
 import re
@@ -17,8 +17,8 @@ class GlobalFirePowerScraper:
         """From the base url, retrieve the main information for every country"""
 
         base_url = "https://www.globalfirepower.com/countries-listing.php"
-        r = requests.get(base_url)
-        soup = bs(r.content, 'lxml')
+        scraper = cloudscraper.create_scraper()
+        soup = bs(scraper.get(base_url).text, 'lxml')
 
         ranking_table = []
         countries = soup.find_all('div', ['picTrans recordsetContainer boxShadow'])
@@ -100,7 +100,7 @@ class GlobalFirePowerScraper:
 
     async def __fetch_all(self, urls):
         tasks = []
-        async with ClientSession() as session:
+        async with CloudflareScraper() as session:
             for position, url in enumerate(urls):
                 task = asyncio.ensure_future(self.__fetch(url, position, session))
                 tasks.append(task)
