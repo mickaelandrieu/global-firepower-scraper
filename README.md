@@ -38,6 +38,7 @@ Exemple of output:
 ```
 # Build
 python setup.py sdist bdist_wheel
+twine upload dist/*
 
 # Test
 python -m pip install -e .
